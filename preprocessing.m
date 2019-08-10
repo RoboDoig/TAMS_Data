@@ -49,6 +49,10 @@ frontPawX = nan(1,length(voltage.Timems));
 frontPawX(locs) = behaviorData.front_paw_x; frontPawX(1:locs(1)) = frontPawX(locs(1)); frontPawX(end) = frontPawX(locs(end)); frontPawX = fillmissing(frontPawX, 'linear');
 frontPawY = nan(1,length(voltage.Timems));
 frontPawY(locs) = behaviorData.front_paw_y; frontPawY(1:locs(1)) = frontPawY(locs(1)); frontPawY(end) = frontPawY(locs(end)); frontPawY = fillmissing(frontPawY, 'linear');
+hindPawX = nan(1,length(voltage.Timems));
+hindPawX(locs) = behaviorData.hind_paw_x; hindPawX(1:locs(1)) = hindPawX(locs(1)); hindPawX(end) = hindPawX(locs(end)); hindPawX = fillmissing(hindPawX, 'linear');
+hindPawY = nan(1,length(voltage.Timems));
+hindPawY(locs) = behaviorData.hind_paw_y; hindPawY(1:locs(1)) = hindPawY(locs(1)); hindPawY(end) = hindPawY(locs(end)); hindPawY = fillmissing(hindPawY, 'linear');
 
 
 %% optional downsample for speed, consolidate data
@@ -60,6 +64,8 @@ dataSet.visStim     = downsample(voltage.VisStim, 5);
 dataSet.wheelSpeed  = downsample(voltage.WheelSpeed, 5);
 dataSet.frontPawX   = downsample(frontPawX, 5);
 dataSet.frontPawY   = downsample(frontPawY, 5);
+dataSet.hindPawX    = downsample(hindPawX, 5);
+dataSet.hindPawY    = downsample(hindPawY, 5);
 dataSet.f           = downsample(fInterp', 5)';
 dataSet.spks        = downsample(spksInterp', 5)';
 dataSet.frameTimes  = locs/5;
