@@ -1,9 +1,10 @@
 %% S1 analysis preprocessing
 clear all; close all; clc;
 disp('loading raw data...');
-folders = {'TSeries-08062019-1859-083', 'TSeries-08062019-1859-084'};
-offsets = {1:37871, 37872:40000}; % suite2p data for 2 experiments is saved as single concatenated file, choose which data points
+folders  = {'TSeries-08062019-1859-083', 'TSeries-08062019-1859-084'};
+offsets  = {1:37871, 37872:40000}; % suite2p data for 2 experiments is saved as single concatenated file, choose which data points
 behavior = {'TamsMcD190806_3.mat', 'TamsMcD190806_4.mat'};
+video    = {'TamsMcD190806_3-labeled.avi', 'TamsMcD190806_4-labeled.avi'};
 fold = 1; % select dataset
 
 % fluorescence data from suite2p
@@ -37,23 +38,21 @@ for t = 1:length(tSeries)
    fAligned(:,tIdxMin) = f(:,t);
    spksAligned(:,tIdxMin) = spksCell(:,t);
 end
-fAligned(:, end) = 0; fInterp = fillmissing(fAligned', 'linear')';
+fAligned(:, end)    = 0; fInterp = fillmissing(fAligned', 'linear')';
 spksAligned(:, end) = 0; spksInterp = fillmissing(spksAligned', 'linear')';
-
 
 %% time align behavior data to frame counter
 disp('time align deep-lab-cut')
-frameTrigger = abs(diff(voltage.CameraFrame));
-[pks, locs] = findpeaks(frameTrigger);
-frontPawX = nan(1,length(voltage.Timems));
-frontPawX(locs) = behaviorData.front_paw_x; frontPawX(1:locs(1)) = frontPawX(locs(1)); frontPawX(end) = frontPawX(locs(end)); frontPawX = fillmissing(frontPawX, 'linear');
-frontPawY = nan(1,length(voltage.Timems));
-frontPawY(locs) = behaviorData.front_paw_y; frontPawY(1:locs(1)) = frontPawY(locs(1)); frontPawY(end) = frontPawY(locs(end)); frontPawY = fillmissing(frontPawY, 'linear');
-hindPawX = nan(1,length(voltage.Timems));
-hindPawX(locs) = behaviorData.hind_paw_x; hindPawX(1:locs(1)) = hindPawX(locs(1)); hindPawX(end) = hindPawX(locs(end)); hindPawX = fillmissing(hindPawX, 'linear');
-hindPawY = nan(1,length(voltage.Timems));
-hindPawY(locs) = behaviorData.hind_paw_y; hindPawY(1:locs(1)) = hindPawY(locs(1)); hindPawY(end) = hindPawY(locs(end)); hindPawY = fillmissing(hindPawY, 'linear');
-
+frameTrigger        = abs(diff(voltage.CameraFrame));
+[pks, locs]         = findpeaks(frameTrigger);
+frontPawX           = nan(1,length(voltage.Timems));
+frontPawX(locs)     = behaviorData.front_paw_x; frontPawX(1:locs(1)) = frontPawX(locs(1)); frontPawX(end) = frontPawX(locs(end)); frontPawX = fillmissing(frontPawX, 'linear');
+frontPawY           = nan(1,length(voltage.Timems));
+frontPawY(locs)     = behaviorData.front_paw_y; frontPawY(1:locs(1)) = frontPawY(locs(1)); frontPawY(end) = frontPawY(locs(end)); frontPawY = fillmissing(frontPawY, 'linear');
+hindPawX            = nan(1,length(voltage.Timems));
+hindPawX(locs)      = behaviorData.hind_paw_x; hindPawX(1:locs(1)) = hindPawX(locs(1)); hindPawX(end) = hindPawX(locs(end)); hindPawX = fillmissing(hindPawX, 'linear');
+hindPawY            = nan(1,length(voltage.Timems));
+hindPawY(locs)      = behaviorData.hind_paw_y; hindPawY(1:locs(1)) = hindPawY(locs(1)); hindPawY(end) = hindPawY(locs(end)); hindPawY = fillmissing(hindPawY, 'linear');
 
 %% optional downsample for speed, consolidate data
 disp('consolidating, saving')
@@ -69,5 +68,6 @@ dataSet.hindPawY    = downsample(hindPawY, 5);
 dataSet.f           = downsample(fInterp', 5)';
 dataSet.spks        = downsample(spksInterp', 5)';
 dataSet.frameTimes  = locs/5;
+dataSet.video       = video{fold};
 
 save([folders{fold}, '.mat'], 'dataSet', '-v7.3')
