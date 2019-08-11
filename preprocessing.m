@@ -33,13 +33,16 @@ f = fCell - (neuCell * 0.7);
 disp('time align fluorescence')
 fAligned = nan(size(f,1), length(voltage.Timems));
 spksAligned = nan(size(f,1), length(voltage.Timems));
+fImageAligned = nan(1, length(voltage.Timems));
 for t = 1:length(tSeries)
    tIdxMin = find(voltage.Timems>=tSeries(t),1);
-   fAligned(:,tIdxMin) = f(:,t);
-   spksAligned(:,tIdxMin) = spksCell(:,t);
+   fAligned(:, tIdxMin) = f(:,t);
+   spksAligned(:, tIdxMin) = spksCell(:,t);
+   fImageAligned(1, tIdxMin) = t;
 end
 fAligned(:, end)    = 0; fInterp = fillmissing(fAligned', 'linear')';
 spksAligned(:, end) = 0; spksInterp = fillmissing(spksAligned', 'linear')';
+fImageAligned(:, end) = max(fImageAligned); fImageInterp = fillmissing(fImageAligned, 'previous');
 
 %% time align behavior data to frame counter
 disp('time align deep-lab-cut')
@@ -69,5 +72,8 @@ dataSet.f           = downsample(fInterp', 5)';
 dataSet.spks        = downsample(spksInterp', 5)';
 dataSet.frameTimes  = locs/5;
 dataSet.video       = video{fold};
+dataSet.fImageIndex = downsample(fImageInterp, 5);
+dataSet.folder      = folders{fold};
+dataSet.cellIdx     = cellIdx;
 
 save([folders{fold}, '.mat'], 'dataSet', '-v7.3')

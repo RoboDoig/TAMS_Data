@@ -34,34 +34,49 @@ for i = 1:size(dff,1)
 %     plot(dataSet.time, zscored(i,:),'k');
 end
 
-figure; subplot(3,1,1:2);
-imagesc(dataSet.time, 1:size(dff,1), zscored); colormap('hot'); caxis([-1 20]);
-subplot(3,1,3);
-plot(dataSet.time, dataSet.wheelSpeed, 'k'); xlim([0 max(dataSet.time)])
-
-range = 4000:16000;
-figure; subplot(3,1,1:2);
-imagesc(dataSet.time(range), 1:size(dff,1), zscored(:, range)); colormap('hot'); caxis([-1 20]);
-subplot(3,1,3);
-plot(dataSet.time(range), dataSet.frontPawX(range), 'k'); xlim([min(dataSet.time(range)) max(dataSet.time(range))])
-
-%% finding video frame for point
-% v = VideoReader(dataSet.video);
+% figure; subplot(3,1,1:2);
+% imagesc(dataSet.time, 1:size(dff,1), zscored); colormap('hot'); caxis([-1 20]);
+% subplot(3,1,3);
+% plot(dataSet.time, dataSet.wheelSpeed, 'k'); xlim([0 max(dataSet.time)])
 % 
-% time = 0;
-% index = find(dataSet.time>=time, 1);
-% frameIndex = find(dataSet.frameTimes>=index, 1);
-% frame = read(v, frameIndex);
-% 
-% figure;
-% imagesc(frame)
+% range = 4000:16000;
+% figure; subplot(3,1,1:2);
+% imagesc(dataSet.time(range), 1:size(dff,1), zscored(:, range)); colormap('hot'); caxis([-1 20]);
+% subplot(3,1,3);
+% plot(dataSet.time(range), dataSet.frontPawX(range), 'k'); xlim([min(dataSet.time(range)) max(dataSet.time(range))])
 
 %% create movie of data range
 v = VideoReader(dataSet.video);
-timeRange = 20:30; %time range in seconds
+w = VideoWriter('test3.avi'); w.FrameRate = 200;
+timeRange = 570:620; %time range in seconds
 idxMin = find(dataSet.time>=timeRange(1),1); idxMax = find(dataSet.time>=timeRange(end),1);
+range = idxMin:idxMax;
 
+c = 1;
+open(w);
 for i = idxMin:idxMax
+   tic
+   disp(i);
    frameIndex =  find(dataSet.frameTimes>=i, 1);
    frame = read(v, frameIndex);
+   
+   % camera frame
+   figure(1); set(gcf,'Position',[100 100 600 900], 'color', 'k');
+   subplot(5,1,1:2);
+   imagesc(frame); set(gca, 'YTickLabel', [], 'XTickLabel', [], 'YTick', [], 'XTick', []);
+   % heatmap
+   subplot(5,1,4:5);
+   map = zscored(:,range); map(:,c:end) = -100;
+   imagesc(dataSet.time(range), 1:size(dff,1), map); colormap('hot'); caxis([-1 20]);
+   % behavior trace
+   subplot(5,1,3);
+   trace = dataSet.frontPawX(range); trace(c:end) = NaN;
+   plot(dataSet.time(range), trace, 'w'); xlim([min(dataSet.time(range)) max(dataSet.time(range))]); ylim([600, 1000])
+   set(gca, 'Color', 'k')
+   F = getframe(gcf);
+   writeVideo(w, F);
+   
+   c = c+1;
+   disp(toc);
 end
+close(w);
